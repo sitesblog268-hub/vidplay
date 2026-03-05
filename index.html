@@ -3,222 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Hub Pro</title>
+    <title>Video Hub - Direct MP4</title>
     <style>
         :root {
             --primary: #0095f6;
-            --danger: #ed4956;
             --bg: #fafafa;
             --accent: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
         }
 
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; padding: 10px; padding-bottom: 80px; }
         
-        .card { background: white; width: 100%; max-width: 450px; border-radius: 15px; border: 1px solid #dbdbdb; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; overflow: hidden; }
+        /* CARD CONTAINER */
+        .card { background: white; width: 100%; max-width: 450px; border-radius: 20px; border: 1px solid #dbdbdb; box-shadow: 0 4px 25px rgba(0,0,0,0.1); overflow: hidden; position: relative; }
 
         /* HEADER */
-        .header { padding: 30px 20px 20px; text-align: center; border-bottom: 1px solid #eee; position: relative; }
-        .admin-btn { position: absolute; top: 10px; right: 10px; background: #333; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; z-index: 1000; font-size: 11px; font-weight: bold; }
-        .video-logo { width: 70px; height: 70px; background: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
+        .header { padding: 30px 20px; text-align: center; border-bottom: 1px solid #eee; position: relative; }
+        .admin-trigger { position: absolute; top: 10px; right: 10px; background: #333; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; z-index: 100; }
+        .video-logo { width: 70px; height: 70px; background: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
         .logo-play { width: 0; height: 0; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-left: 20px solid white; margin-left: 5px; }
 
-        /* SLOT IKLAN */
-        .ads-slot { background: #fdfdfd; border: 1px dashed #ccc; margin: 15px; padding: 10px; text-align: center; font-size: 10px; color: #aaa; border-radius: 8px; min-height: 50px; display: flex; align-items: center; justify-content: center; }
-
-        /* VIDEO ITEM */
-        .video-feed { padding: 0 15px; display: flex; flex-direction: column; gap: 20px; }
-        .video-item { background: white; border-radius: 15px; overflow: hidden; border: 1px solid #eee; position: relative; }
-        .video-title { padding: 12px; font-weight: bold; font-size: 15px; color: #262626; }
+        /* VIDEO FEED */
+        .video-feed { padding: 15px; display: flex; flex-direction: column; gap: 20px; }
+        .video-item { background: #fff; border-radius: 15px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .video-title { padding: 12px 15px; font-weight: bold; font-size: 15px; color: #262626; }
         
-        .video-wrapper { position: relative; width: 100%; height: 250px; background: #000; cursor: pointer; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        
-        .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 55px; height: 55px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; pointer-events: none; }
-        .inner-play { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 18px solid white; margin-left: 4px; }
+        .video-container { position: relative; width: 100%; background: #000; cursor: pointer; display: flex; align-items: center; justify-content: center; min-height: 250px; }
+        video { width: 100%; display: block; }
 
-        .admin-controls { padding: 8px; background: #fff5f5; border-top: 1px solid #ffecec; }
-        .btn-del { width: 100%; padding: 8px; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        /* TOMBOL PLAY TENGAH */
+        .play-btn-overlay { position: absolute; width: 60px; height: 60px; background: rgba(0,0,0,0.5); border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; transition: 0.3s; pointer-events: none; }
+        .play-icon-inner { width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 18px solid white; margin-left: 5px; }
 
-        /* STICKY ADS (MELAYANG) */
-        .sticky-ads { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; background: #fff; border-top: 1px solid #ddd; height: 60px; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        /* PANEL ADMIN */
+        #adminPanel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 85%; max-width: 380px; z-index: 1000; padding: 25px; border-radius: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.4); }
+        .admin-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
+        .btn-post { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        #adminPanel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 380px; z-index: 10000; padding: 25px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-        .admin-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .pagination { display: flex; justify-content: center; gap: 15px; padding: 25px 15px; }
-        .btn-nav { background: white; border: 1px solid #ddd; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        /* ADS PLACEHOLDER */
+        .ads-box { background: #f9f9f9; border: 1px dashed #bbb; margin: 15px; padding: 15px; text-align: center; font-size: 10px; color: #999; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <div class="header">
-        <button class="admin-btn" id="loginBtn" onclick="authAdmin()">⚙️ ADMIN</button>
+        <button class="admin-trigger" onclick="loginAdmin()">⚙️ ADMIN</button>
         <div class="video-logo"><div class="logo-play"></div></div>
         <h3 style="margin: 0;">Video Hub Pro</h3>
-        <div style="font-size: 12px; color: #666; margin-top: 5px;">
-            <span style="color:#2ecc71">●</span> <span id="userOnline">142</span> User Online
+        <p style="font-size: 12px; color: #666; margin: 5px 0 0;">Public Feed • Online: <span id="onlineCount">142</span></p>
+    </div>
+
+    <div class="ads-box">IKLAN BANNER ATAS</div>
+
+    <div id="videoFeed" class="video-feed">
         </div>
-    </div>
 
-    <div class="ads-slot" id="ads-top">
-        <script>
-  atOptions = {
-    'key' : '90fe6b96bcb087940a1b55ba2a059953',
-    'format' : 'iframe',
-    'height' : 250,
-    'width' : 300,
-    'params' : {}
-  };
-</script>
-<script src="https://venisonglum.com/90fe6b96bcb087940a1b55ba2a059953/invoke.js"></script>
-    </div>
-
-    <div id="videoFeed" class="video-feed"></div>
-
-    <div class="ads-slot" id="ads-middle">
-        <script>
-  atOptions = {
-    'key' : 'b7d561ea23831a6a6d71bb9ab62403d4',
-    'format' : 'iframe',
-    'height' : 50,
-    'width' : 320,
-    'params' : {}
-  };
-</script>
-<script src="https://venisonglum.com/b7d561ea23831a6a6d71bb9ab62403d4/invoke.js"></script>
-    </div>
-
-    <div class="pagination">
-        <button id="prevBtn" class="btn-nav" onclick="navPage(-1)">Back</button>
-        <button id="nextBtn" class="btn-nav" onclick="navPage(1)">Next</button>
-    </div>
-</div>
-
-<div class="sticky-ads">
-    <div style="font-size: 9px; color: #ccc;"><script>
-  atOptions = {
-    'key' : '47d978d14968832cdada419d649a84e4',
-    'format' : 'iframe',
-    'height' : 60,
-    'width' : 468,
-    'params' : {}
-  };
-</script>
-<script src="https://venisonglum.com/47d978d14968832cdada419d649a84e4/invoke.js"></script></div>
+    <div class="ads-box">IKLAN BANNER BAWAH</div>
 </div>
 
 <div id="adminPanel">
-    <h3 style="margin-top: 0;">Tambah Video</h3>
-    <input type="text" id="inpTitle" class="admin-input" placeholder="Judul Video">
-    <input type="text" id="inpUrl" class="admin-input" placeholder="Link .mp4">
-    <button onclick="submitVideo()" style="width:100%; padding:12px; background:#2ecc71; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">PUBLIKASIKAN</button>
-    <button onclick="toggleAdminPanel(false)" style="width:100%; padding:8px; background:none; border:none; color:#666; cursor:pointer; margin-top:5px;">Tutup</button>
+    <h3 style="margin-top: 0;">Tambah Video (.mp4)</h3>
+    <input type="text" id="vTitle" class="admin-input" placeholder="Judul Video">
+    <input type="text" id="vUrl" class="admin-input" placeholder="Tempel Link Tautan .mp4">
+    <button class="btn-post" onclick="postVideo()">PUBLIKASIKAN</button>
+    <button onclick="closeAdmin()" style="width:100%; background:none; border:none; color:#999; margin-top:10px; cursor:pointer;">Batal</button>
 </div>
 
 <script>
-    const KEY = "dik123";
-    let page = 0;
-    const size = 3;
-    let isLogged = false;
+    // GANTI DENGAN URL FIREBASE KAMU
+    const DATABASE_URL = "https://videohub-123-default-rtdb.firebaseio.com/"; 
+    const PASS = "1234";
+    let is_admin = false;
 
-    let videos = JSON.parse(localStorage.getItem('db_videos')) || [
-        { title: "Sample Video 1", url: "https://www.w3schools.com/html/mov_bbb.mp4" },
-        { title: "Sample Video 2", url: "https://www.w3schools.com/html/movie.mp4" }
-    ];
+    // AMBIL DATA DARI FIREBASE
+    async function getVideos() {
+        try {
+            const res = await fetch(`${DATABASE_URL}/videos.json`);
+            const data = await res.json();
+            const feed = document.getElementById('videoFeed');
+            feed.innerHTML = '';
 
-    function render() {
-        const container = document.getElementById('videoFeed');
-        container.innerHTML = '';
-        const start = page * size;
-        const visible = videos.slice(start, start + size);
-
-        visible.forEach((v, i) => {
-            const idx = start + i;
-            const item = document.createElement('div');
-            item.className = 'video-item';
-            
-            let content = `
-                <div class="video-title">${v.title}</div>
-                <div class="video-wrapper" onclick="togglePlay(this)">
-                    <video loop muted playsinline autoplay>
-                        <source src="${v.url}" type="video/mp4">
-                    </video>
-                    <div class="play-overlay"><div class="inner-play"></div></div>
-                </div>
-            `;
-
-            if (isLogged) {
-                content += `<div class="admin-controls"><button class="btn-del" onclick="delVideo(${idx})">Hapus Postingan</button></div>`;
+            if (data) {
+                Object.keys(data).reverse().forEach(key => {
+                    const v = data[key];
+                    const item = document.createElement('div');
+                    item.className = 'video-item';
+                    item.innerHTML = `
+                        <div class="video-title">${v.title}</div>
+                        <div class="video-container" onclick="playPause(this)">
+                            <video loop muted playsinline autoplay preload="metadata">
+                                <source src="${v.url}" type="video/mp4">
+                            </video>
+                            <div class="play-btn-overlay"><div class="play-icon-inner"></div></div>
+                        </div>
+                        ${is_admin ? `<button onclick="hapusVideo('${key}')" style="width:100%; padding:8px; background:#ff4d4d; color:white; border:none; cursor:pointer; font-size:12px;">Hapus Postingan</button>` : ''}
+                    `;
+                    feed.appendChild(item);
+                });
             }
-
-            item.innerHTML = content;
-            container.appendChild(item);
-        });
-
-        document.getElementById('prevBtn').disabled = (page === 0);
-        document.getElementById('nextBtn').disabled = (start + size >= videos.length);
-        localStorage.setItem('db_videos', JSON.stringify(videos));
+        } catch (e) { console.log("Error load data"); }
     }
 
-    function togglePlay(wrapper) {
-        const vid = wrapper.querySelector('video');
-        const overlay = wrapper.querySelector('.play-overlay');
+    // FUNGSI PLAY/PAUSE
+    function playPause(el) {
+        const vid = el.querySelector('video');
+        const overlay = el.querySelector('.play-btn-overlay');
         if (vid.paused) {
             vid.play();
             vid.muted = false;
-            overlay.style.display = 'none';
+            overlay.style.opacity = '0';
         } else {
             vid.pause();
-            overlay.style.display = 'flex';
+            overlay.style.opacity = '1';
         }
     }
 
-    function authAdmin() {
-        if (!isLogged) {
-            if (prompt("Password:") === KEY) {
-                isLogged = true;
-                document.getElementById('loginBtn').textContent = "➕ TAMBAH";
-                document.getElementById('loginBtn').style.background = "#2ecc71";
-                render();
+    // LOGIN ADMIN
+    function loginAdmin() {
+        if (!is_admin) {
+            if (prompt("Masukkan Password Admin:") === PASS) {
+                is_admin = true;
+                document.getElementById('adminPanel').style.display = 'block';
+                getVideos();
             }
         } else {
-            toggleAdminPanel(true);
+            document.getElementById('adminPanel').style.display = 'block';
         }
     }
 
-    function toggleAdminPanel(show) { document.getElementById('adminPanel').style.display = show ? 'block' : 'none'; }
+    // POSTING VIDEO KE FIREBASE
+    async function postVideo() {
+        const t = document.getElementById('vTitle').value;
+        const u = document.getElementById('vUrl').value;
 
-    function submitVideo() {
-        const t = document.getElementById('inpTitle').value;
-        const u = document.getElementById('inpUrl').value;
         if (t && u) {
-            videos.unshift({ title: t, url: u });
-            localStorage.setItem('db_videos', JSON.stringify(videos));
-            location.reload();
+            await fetch(`${DATABASE_URL}/videos.json`, {
+                method: 'POST',
+                body: JSON.stringify({ title: t, url: u, time: Date.now() })
+            });
+            document.getElementById('vTitle').value = '';
+            document.getElementById('vUrl').value = '';
+            closeAdmin();
+            getVideos();
+        } else {
+            alert("Isi Judul dan Link!");
         }
     }
 
-    function delVideo(i) { if (confirm("Hapus?")) { videos.splice(i, 1); render(); } }
-    function navPage(s) { page += s; render(); window.scrollTo(0, 0); }
+    // HAPUS VIDEO
+    async function hapusVideo(id) {
+        if (confirm("Hapus video ini secara permanen?")) {
+            await fetch(`${DATABASE_URL}/videos/${id}.json`, { method: 'DELETE' });
+            getVideos();
+        }
+    }
 
-    // User Online Simulasi
-    setInterval(() => {
-        document.getElementById('userOnline').textContent = Math.floor(Math.random() * 40) + 120;
-    }, 4000);
+    function closeAdmin() { document.getElementById('adminPanel').style.display = 'none'; }
+    
+    // Auto Update Online Count
+    setInterval(() => { document.getElementById('onlineCount').textContent = Math.floor(Math.random() * 50) + 120; }, 5000);
 
-    window.onload = render;
+    window.onload = getVideos;
 </script>
-   <!-- Histats.com  START  (aync)-->
-<script type="text/javascript">var _Hasync= _Hasync|| [];
-_Hasync.push(['Histats.start', '1,4626895,4,0,0,0,00010000']);
-_Hasync.push(['Histats.fasi', '1']);
-_Hasync.push(['Histats.track_hits', '']);
-(function() {
-var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
-hs.src = ('//s10.histats.com/js15_as.js');
-(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
-})();</script>
-<noscript><a href="/" target="_blank"><img  src="//sstatic1.histats.com/0.gif?4626895&101" alt="" border="0"></a></noscript>
-<!-- Histats.com  END  -->
+
 </body>
 </html>
